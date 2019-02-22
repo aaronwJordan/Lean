@@ -42,6 +42,8 @@ namespace QuantConnect.AlgorithmFactory.Python.Wrappers
     public class AlgorithmPythonWrapper : IAlgorithm
     {
         private readonly dynamic _algorithm = null;
+        private readonly dynamic _onData;
+        private readonly dynamic _onOrderEvent;
         private readonly IAlgorithm _baseAlgorithm;
         private readonly bool _isOnDataDefined = false;
 
@@ -82,8 +84,11 @@ namespace QuantConnect.AlgorithmFactory.Python.Wrappers
 
                             // determines whether OnData method was defined or inherits from QCAlgorithm
                             // If it is not, OnData from the base class will not be called
-                            var pythonType = (_algorithm as PyObject).GetAttr("OnData").GetPythonType();
+                            _onData = (_algorithm as PyObject).GetAttr("OnData");
+                            var pythonType = _onData.GetPythonType();
                             _isOnDataDefined = pythonType.Repr().Equals("<class \'method\'>");
+
+                            _onOrderEvent = (_algorithm as PyObject).GetAttr("OnOrderEvent");
                         }
                     }
 
@@ -543,7 +548,7 @@ namespace QuantConnect.AlgorithmFactory.Python.Wrappers
             {
                 using (Py.GIL())
                 {
-                    _algorithm.OnData(SubscriptionManager.HasCustomData ? new PythonSlice(slice) : slice);
+                    _onData(SubscriptionManager.HasCustomData ? new PythonSlice(slice) : slice);
                 }
             }
         }
@@ -688,7 +693,7 @@ namespace QuantConnect.AlgorithmFactory.Python.Wrappers
         {
             using (Py.GIL())
             {
-                _algorithm.OnOrderEvent(newEvent);
+                _onOrderEvent(newEvent);
             }
         }
 
@@ -778,6 +783,14 @@ namespace QuantConnect.AlgorithmFactory.Python.Wrappers
         /// <param name="brokerageModel">The brokerage model used to emulate the real
         /// brokerage</param>
         public void SetBrokerageModel(IBrokerageModel brokerageModel) => _baseAlgorithm.SetBrokerageModel(brokerageModel);
+
+        /// <summary>
+        /// Sets the account currency cash symbol this algorithm is to manage.
+        /// </summary>
+        /// <remarks>Has to be called during <see cref="Initialize"/> before
+        /// calling <see cref="SetCash(decimal)"/> or adding any <see cref="Security"/></remarks>
+        /// <param name="accountCurrency">The account currency cash symbol to set</param>
+        public void SetAccountCurrency(string accountCurrency) => _baseAlgorithm.SetAccountCurrency(accountCurrency);
 
         /// <summary>
         /// Set the starting capital for the strategy
