@@ -7,31 +7,18 @@ FROM quantconnect/lean:foundation
 
 MAINTAINER QuantConnect <contact@quantconnect.com>
 
-#################################
-# Option 1: Download from Master
-# RUN \
-#	wget https://github.com/QuantConnect/Lean/archive/master.zip && \
-#	unzip master.zip -d /root/Lean && \
-#	cd /root/Lean
-# RUN \
-#	sed -i 's/4.5/4.0/' Algorithm.VisualBasic/QuantConnect.Algorithm.VisualBasic.vbproj && \
-#	wget https://nuget.org/nuget.exe && \
-#	mono nuget.exe restore QuantConnect.Lean.sln -NonInteractive && \
-#	xbuild /property:Configuration=Release && \
-#	cd /root/Lean/Launcher/bin/Release/
-#################################
-
+################################
+# Copy over binaries:
+COPY ./Launcher/bin/Release /root/Lean/Launcher/bin/Release
+COPY ./Launcher/bin/WrapRelease /root/Wrap
 
 ################################
-# Option 2: Run Local Binaries:
-COPY ./Launcher/bin/Release /root/Lean/Launcher/bin/Release
-#################################
-
-# Finally.
-WORKDIR /root/Lean/Launcher/bin/Release
-CMD [ "mono", "QuantConnect.Lean.Launcher.exe"] # Run app
+# Kick off Wrap
+WORKDIR /root/Wrap
+ENTRYPOINT ["dotnet", "wrap.dll"]
+CMD ["--mode slave", "--slaves 2"]
 
 # Usage: 
 # docker build -t quantconnect/lean:foundation -f DockerfileLeanFoundation .
 # docker build -t quantconnect/lean:algorithm -f Dockerfile .
-# docker run -v "(absolute to your data folder):/root/Lean/Data" quantconnect/lean:algorithm 
+# docker run -v "C:\QuantyBois\Lean\Data:/root/Lean/Data" quantconnect/lean:algorithm
