@@ -13,8 +13,10 @@
  * limitations under the License.
 */
 
+using System;
 using System.Collections.Generic;
 using QuantConnect.Data;
+using QuantConnect.Indicators;
 using QuantConnect.Interfaces;
 
 namespace QuantConnect.Algorithm.CSharp
@@ -26,28 +28,34 @@ namespace QuantConnect.Algorithm.CSharp
     /// <meta name="tag" content="using data" />
     /// <meta name="tag" content="using quantconnect" />
     /// <meta name="tag" content="trading and orders" />
-    public class BasicTemplateAlgorithm : QCAlgorithm, IRegressionAlgorithmDefinition
+    public class BasicTemplateAlgorithm : QCAlgorithm
     {
-        private Symbol _spy = QuantConnect.Symbol.Create("SPY", SecurityType.Equity, Market.USA);
+		// private Symbol _spy = QuantConnect.Symbol.Create("SPY", SecurityType.Equity, Market.USA);
+		private readonly string _symbol = "SPY";
+		private ExponentialMovingAverage _emaFast;
+		private ExponentialMovingAverage _emaSlow;
 
-        /// <summary>
-        /// Initialise the data and resolution required, as well as the cash and start-end dates for your algorithm. All algorithms must initialized.
-        /// </summary>
-        public override void Initialize()
+		/// <summary>
+		/// Initialise the data and resolution required, as well as the cash and start-end dates for your algorithm. All algorithms must initialized.
+		/// </summary>
+		public override void Initialize()
         {
-            SetStartDate(2013, 10, 07);  //Set Start Date
-            SetEndDate(2013, 10, 11);    //Set End Date
+            SetStartDate(2016, 01, 01);  //Set Start Date
+            SetEndDate(2018, 08, 01);    //Set End Date
             SetCash(100000);             //Set Strategy Cash
 
             // Find more symbols here: http://quantconnect.com/data
             // Forex, CFD, Equities Resolutions: Tick, Second, Minute, Hour, Daily.
             // Futures Resolution: Tick, Second, Minute
             // Options Resolution: Minute Only.
-            AddEquity("SPY", Resolution.Minute);
+            AddSecurity(SecurityType.Equity, _symbol, Resolution.Hour);
+			_emaFast = EMA(_symbol, 7, Resolution.Hour);
+			_emaSlow = EMA(_symbol, 21, Resolution.Hour);
 
-            // There are other assets with similar methods. See "Selecting Options" etc for more details.
-            // AddFuture, AddForex, AddCfd, AddOption
-        }
+			// There are other assets with similar methods. See "Selecting Options" etc for more details.
+			// AddFuture, AddForex, AddCfd, AddOption
+			SetWarmup(TimeSpan.FromDays(30));
+		}
 
         /// <summary>
         /// OnData event is the primary entry point for your algorithm. Each new data point will be pumped in here.
@@ -55,47 +63,19 @@ namespace QuantConnect.Algorithm.CSharp
         /// <param name="data">Slice object keyed by symbol containing the stock data</param>
         public override void OnData(Slice data)
         {
-            if (!Portfolio.Invested)
-            {
-                SetHoldings(_spy, 1);
-                Debug("Purchased Stock");
-            }
-        }
+			if (!_emaFast.IsReady) { return; }
+			if (!_emaSlow.IsReady) { return; }
 
-        /// <summary>
-        /// This is used by the regression test system to indicate if the open source Lean repository has the required data to run this algorithm.
-        /// </summary>
-        public bool CanRunLocally { get; } = true;
-
-        /// <summary>
-        /// This is used by the regression test system to indicate which languages this algorithm is written in.
-        /// </summary>
-        public Language[] Languages { get; } = { Language.CSharp, Language.Python };
-
-        /// <summary>
-        /// This is used by the regression test system to indicate what the expected statistics are from running the algorithm
-        /// </summary>
-        public Dictionary<string, string> ExpectedStatistics => new Dictionary<string, string>
-        {
-            {"Total Trades", "1"},
-            {"Average Win", "0%"},
-            {"Average Loss", "0%"},
-            {"Compounding Annual Return", "263.153%"},
-            {"Drawdown", "2.200%"},
-            {"Expectancy", "0"},
-            {"Net Profit", "1.663%"},
-            {"Sharpe Ratio", "4.41"},
-            {"Loss Rate", "0%"},
-            {"Win Rate", "0%"},
-            {"Profit-Loss Ratio", "0"},
-            {"Alpha", "0.007"},
-            {"Beta", "76.118"},
-            {"Annual Standard Deviation", "0.192"},
-            {"Annual Variance", "0.037"},
-            {"Information Ratio", "4.354"},
-            {"Tracking Error", "0.192"},
-            {"Treynor Ratio", "0.011"},
-            {"Total Fees", "$3.26"}
-        };
+			if (_emaFast > _emaSlow)
+			{
+				SetHoldings(_symbol, 1);
+				Debug("Long");
+			}
+			else if (_emaFast < _emaSlow)
+			{
+				Liquidate(_symbol);
+				Debug("Short");
+			}
+		} 
     }
 }
