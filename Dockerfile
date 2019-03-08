@@ -15,10 +15,12 @@ COPY ./Launcher/bin/WrapRelease /root/Wrap
 ################################
 # Kick off Wrap
 WORKDIR /root/Wrap
+
+#TODO: Make Wrap into .exe
 ENTRYPOINT ["dotnet", "wrap.dll"]
 CMD ["--mode slave", "--slaves 2"]
 
 # Usage: 
 # docker build -t quantconnect/lean:foundation -f DockerfileLeanFoundation .
 # docker build -t quantconnect/lean:algorithm -f Dockerfile .
-# docker run -v "C:\QuantyBois\Lean\Data:/root/Lean/Data" quantconnect/lean:algorithm
+# docker run -v "C:\repos\quantybois\lean\Data:/root/Lean/Data" quantconnect/lean:algorithm
