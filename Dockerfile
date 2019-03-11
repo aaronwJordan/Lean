@@ -13,12 +13,14 @@ COPY ./Launcher/bin/Release /root/Lean/Launcher/bin/Release
 COPY ./Launcher/bin/WrapRelease /root/Wrap
 
 ################################
-# Kick off Wrap
+# Change directory to Wrap
 WORKDIR /root/Wrap
 
-#TODO: Make Wrap into .exe
-ENTRYPOINT ["dotnet", "wrap.dll"]
-CMD ["--mode slave", "--slaves 2"]
+# What version are we using?
+# CMD ["mono", "--version"]
+
+# Kick off Wrap
+CMD ["mono", "wrap.exe", "-m", "slave", "-s", "1"]
 
 # Usage: 
 # docker build -t quantconnect/lean:foundation -f DockerfileLeanFoundation .
