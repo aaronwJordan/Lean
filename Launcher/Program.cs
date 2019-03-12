@@ -18,6 +18,8 @@ using System;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using QuantConnect.Configuration;
@@ -46,8 +48,23 @@ namespace QuantConnect.Lean.Launcher
 
         static void Main(string[] args)
         {
-            //Initialize:
-            var mode = "RELEASE";
+			// quantybois
+			// Handler called when the Lean Launcher can't figure out how to resolve an assembly
+			AppDomain.CurrentDomain.AssemblyResolve += (object sender, ResolveEventArgs rea) =>
+			{
+				var configuredAlgorithmLocation = Config.Get("algorithm-location", @"C:\repos\quantybois\wrap\wrap\bin\WrapRelease\wrap.algos.dll");
+				var algorithmBuildOuput = Directory.GetParent(configuredAlgorithmLocation).FullName;
+
+				if (rea.Name.Contains("Noda"))
+				{
+					return null;
+				}
+
+				return Assembly.LoadFile(Path.Combine(algorithmBuildOuput, rea.Name.Split(',').First() + ".dll"));
+			};
+
+			//Initialize:
+			var mode = "RELEASE";
             #if DEBUG
                 mode = "DEBUG";
             #endif
