@@ -8,21 +8,22 @@ FROM quantconnect/lean:foundation
 MAINTAINER QuantConnect <contact@quantconnect.com>
 
 ################################
-# Copy over binaries:
-COPY ./Launcher/bin/Release /root/Lean/Launcher/bin/Release
+# Copy over binaries and data (mounting is not ideal):
 COPY ./Launcher/bin/WrapRelease /root/Wrap
+COPY ./Launcher/bin/Debug /root/Wrap/Lean/Launcher/bin/Debug
+COPY ./Data /root/Wrap/Lean/Data
 
 ################################
 # Change directory to Wrap
+# WORKDIR /root/Lean/Launcher/bin/Debug
 WORKDIR /root/Wrap
 
-# What version are we using?
-# CMD ["mono", "--version"]
-
+################################
 # Kick off Wrap
+# CMD ["mono", "QuantConnect.Lean.Launcher.exe"]
 CMD ["mono", "wrap.exe", "-m", "slave", "-s", "1"]
 
 # Usage: 
 # docker build -t quantconnect/lean:foundation -f DockerfileLeanFoundation .
 # docker build -t quantconnect/lean:algorithm -f Dockerfile .
-# docker run -v "C:\repos\quantybois\lean\Data:/root/Lean/Data" quantconnect/lean:algorithm
+# docker run quantconnect/lean:algorithm
