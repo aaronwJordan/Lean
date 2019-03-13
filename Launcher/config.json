@@ -34,7 +34,7 @@
 	"api-handler": "QuantConnect.Api.Api",
 	"map-file-provider": "QuantConnect.Data.Auxiliary.LocalDiskMapFileProvider",
 	"factor-file-provider": "QuantConnect.Data.Auxiliary.LocalDiskFactorFileProvider",
-	"data-provider": "QuantConnect.Lean.Engine.DataFeeds.DefaultDataProvider",
+	"data-provider": "QuantConnect.Lean.Engine.DataFeeds.ApiDataProvider",
 	"alpha-handler": "QuantConnect.Lean.Engine.Alphas.DefaultAlphaHandler",
 
 	// limits on number of symbols to allow
