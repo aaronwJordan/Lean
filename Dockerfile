@@ -26,4 +26,4 @@ CMD ["mono", "wrap.exe", "-m", "slave", "-s", "1"]
 # Usage: 
 # docker build -t quantconnect/lean:foundation -f DockerfileLeanFoundation .
 # docker build -t quantconnect/lean:algorithm -f Dockerfile .
-# docker run quantconnect/lean:algorithm
+# docker run -e ALGO_GROUP=1 quantconnect/lean:algorithm
