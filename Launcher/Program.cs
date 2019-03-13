@@ -52,15 +52,20 @@ namespace QuantConnect.Lean.Launcher
 			// Handler called when the Lean Launcher can't figure out how to resolve an assembly
 			AppDomain.CurrentDomain.AssemblyResolve += (object sender, ResolveEventArgs rea) =>
 			{
-				var configuredAlgorithmLocation = Config.Get("algorithm-location", @"C:\repos\quantybois\wrap\wrap\bin\WrapRelease\wrap.algos.dll");
+				// var configuredAlgorithmLocation = Config.Get("algorithm-location", @"C:\repos\quantybois\wrap\wrap\bin\WrapRelease\wrap.algos.dll");
+				var configuredAlgorithmLocation = Config.Get("algorithm-location", @"/root/Wrap/wrap.algos.dll");
+				Log.Trace($"configuredAlgorithmLocation: {configuredAlgorithmLocation}");
 				var algorithmBuildOuput = Directory.GetParent(configuredAlgorithmLocation).FullName;
+				Log.Trace($"algorithmBuildOuput: {algorithmBuildOuput}");
 
 				if (rea.Name.Contains("Noda"))
 				{
 					return null;
 				}
 
-				return Assembly.LoadFile(Path.Combine(algorithmBuildOuput, rea.Name.Split(',').First() + ".dll"));
+				var assemblyFile = Assembly.LoadFile(Path.Combine(algorithmBuildOuput, rea.Name.Split(',').First() + ".dll"));
+				Log.Trace($"assemblyFile: {assemblyFile}");
+				return assemblyFile;
 			};
 
 			//Initialize:
