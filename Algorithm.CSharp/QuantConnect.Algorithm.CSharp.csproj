@@ -126,6 +126,7 @@
     <Compile Include="Alphas\RebalancingLeveragedETFAlpha.cs" />
     <Compile Include="Alphas\VixDualThrustAlpha.cs" />
     <Compile Include="BasicSetAccountCurrencyAlgorithm.cs" />
+    <Compile Include="BTCDEMA.cs" />
     <Compile Include="HistoryWithSymbolChangesRegressionAlgorithm.cs" />
     <Compile Include="FeeModelNotUsingAccountCurrency.cs" />
     <Compile Include="MaximumPortfolioDrawdownFrameworkAlgorithm.cs" />
